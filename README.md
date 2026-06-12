@@ -28,8 +28,8 @@ A full-stack MERN application for managing personal tasks with categories, filte
 ## Project Structure
 
 ```
-taskdev/
-├── task-duty-client/                # React frontend
+TASKDEV STACK/
+├── TaskDev Client/                # React frontend
 │   └── src/
 │       ├── components/
 │       │   ├── Modal.tsx
@@ -46,7 +46,7 @@ taskdev/
 │       └── services/
 │           └── api.ts
 │
-└── task-duty-server/                # Express backend
+└── TaskDev server/                # Express backend
     ├── config/
     ├── controllers/
     │   └── taskController.ts
@@ -89,7 +89,7 @@ cd tax-duty-server
 npm install
 ```
 
-Create a `.env` file in the `task-duty-server/` folder:
+Create a `.env` file in the `TaskDev Server/` folder:
 
 ```env
 PORT=5200
