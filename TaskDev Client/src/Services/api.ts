@@ -45,6 +45,21 @@ export const deleteTask = async (id: string) => {
   return res.json();
 };
 
+export const getTrashedTasks = async () => {
+  const res = await fetch(`${BASE_URL}/api/tasks/trash`, {
+    method: "GET",
+    credentials: "include",
+  });
+  return res.json();
+};
+
+export const restoreTask = async (id: string) => {
+  const res = await fetch(`${BASE_URL}/api/tasks/${id}/restore`, {
+    method: "PUT",
+    credentials: "include",
+  });
+  return res.json();
+};
 
 // AUTH
 

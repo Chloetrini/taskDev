@@ -1,6 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-
 // TASK MODEL
 // Each task belongs to a user via userId
 
@@ -11,6 +10,8 @@ export interface ITask extends Document {
   tags?: "Urgent" | "Important";
   isDraft: boolean;
   isCompleted: boolean;
+  isDeleted: boolean;       
+  deletedAt: Date | null;   
   dueDate: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -44,6 +45,15 @@ const TaskSchema = new Schema<ITask>(
     isCompleted: {
       type: Boolean,
       default: false,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+  
+    deletedAt: {
+      type: Date,
+      default: null,
     },
     dueDate: {
       type: Date,

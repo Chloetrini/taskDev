@@ -30,6 +30,7 @@ const TasksPage = () => {
       <NavBar />
       <div className="mx-auto container max-w-[1200px] px-4 py-10">
 
+        {/* HEADER — only My Tasks + Add New Task */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-[25px] md:text-[40px] font-[500] text-[#292929]">
             My Tasks
@@ -113,14 +114,25 @@ const TasksPage = () => {
             ))}
           </div>
         )}
-        {filteredTasks.length > 0 && (
+
+
+        <div className="flex  items-center gap-3 mt-10 justify-between" >
+          {filteredTasks.length > 0 && (
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="text-[14px] font-[600] text-[#974FD0] hover:opacity-70 transition-opacity"
+            >
+              Back To Top
+            </button>
+          )}
           <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="block mx-auto mt-10 text-[14px] font-[600] text-[#974FD0] hover:opacity-70 transition-opacity"
+            onClick={() => navigate("/tasks/trash")}
+            className="text-[14px] font-[600] text-gray-400 hover:text-[#974FD0] transition-colors"
           >
-            Back To Top
+            View Trash
           </button>
-        )}
+          
+        </div>
       </div>
 
       {modal && (

@@ -1,6 +1,6 @@
 # TaskDev — Personal Task Manager
 
-A full-stack MERN application for managing personal tasks with authentication, email verification, and full CRUD functionality. Built as part of the Techstudio Internship Program — Week 2 submission.
+A full-stack MERN application for managing personal tasks with authentication, email verification, soft delete with a trash/restore workflow, and full CRUD functionality. Built as part of the Techstudio Internship Program — Week 3 submission.
 
 ---
 
@@ -32,6 +32,13 @@ A full-stack MERN application for managing personal tasks with authentication, e
 - Filter tasks by tag and completion status
 - Form validation — all fields required; due date cannot be in the past
 - Responsive layout — works on desktop and mobile
+
+### Soft Delete & Trash (Week 3)
+- Deleting a task no longer removes it from the database — it's flagged as deleted and moved to a dedicated trash page
+- Trash page lists every deleted task with its details and the date it was trashed
+- Restore brings a trashed task back to the active task list
+- The main task list only shows active tasks; trashed tasks are filtered out
+- Implemented using an `isDeleted` flag and a `deletedAt` timestamp on the task model, so no data is ever lost on delete
 
 ### Extra Feature
 - Password reset via email using Brevo with secure hashed reset tokens that expire after 1 hour
@@ -66,7 +73,8 @@ taskDev-master/
 │       │   ├── PasswordSuccessPage.tsx
 │       │   ├── RegisterPage.tsx
 │       │   ├── ResetPasswordPage.tsx
-│       │   └── TasksPage.tsx
+│       │   ├── TasksPage.tsx
+│       │   └── TrashPage.tsx
 │       └── Services/
 │           └── api.ts
 │
@@ -181,13 +189,36 @@ The client runs on `http://localhost:5173`
 
 ### Task Routes — `/api/tasks`
 
-| Method | Endpoint | Description                      | Protected |
-|--------|----------|----------------------------------|-----------|
-| GET    | /        | Get all tasks for logged in user | Yes       |
-| GET    | /:id     | Get a single task                | Yes       |
-| POST   | /        | Create a new task                | Yes       |
-| PUT    | /:id     | Update a task                    | Yes       |
-| DELETE | /:id     | Delete a task                    | Yes       |
+| Method | Endpoint      | Description                          | Protected |
+|--------|---------------|--------------------------------------|-----------|
+| GET    | /             | Get all active tasks for the user    | Yes       |
+| GET    | /trash        | Get all trashed tasks for the user   | Yes       |
+| GET    | /:id          | Get a single task                    | Yes       |
+| POST   | /             | Create a new task                    | Yes       |
+| PUT    | /:id          | Update a task                        | Yes       |
+| DELETE | /:id          | Soft delete a task (move to trash)   | Yes       |
+| PUT    | /:id/restore  | Restore a trashed task               | Yes       |
+
+---
+
+## Branching Workflow (Week 3)
+
+The soft delete and trash feature was built on a dedicated feature branch and then merged into `main`:
+
+```bash
+# create and switch to the feature branch
+git checkout -b soft-delete
+
+# build the feature, then commit and push to the feature branch
+git add .
+git commit -m "Add soft delete and trash feature"
+git push -u origin soft-delete
+
+# merge the feature branch into main
+git checkout main
+git merge soft-delete
+git push
+```
 
 ---
 
@@ -198,6 +229,7 @@ The client runs on `http://localhost:5173`
 - Email verification tokens hashed with SHA-256 before storing in database
 - Password reset tokens expire after 1 hour
 - All task routes scoped to authenticated user — users cannot access other users' tasks
+- Soft delete and restore are scoped to the owner — users can only trash or restore their own tasks
 
 ---
 
@@ -207,4 +239,4 @@ The client runs on `http://localhost:5173`
 
 ---
 
-Techstudio Internship Program — Online Stage, Week 2
+Techstudio Internship Program — Online Stage, Week 3

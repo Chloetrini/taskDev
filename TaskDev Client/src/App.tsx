@@ -4,6 +4,7 @@ import { TaskProvider } from './Context/AddTaskContext';
 import ProtectedRoute from "./Components/ProtectedRoutes";
 import LandingPage from './Pages/LandingPage'
 import TasksPage from "./Pages/TasksPage";
+import TrashPage from "./Pages/TrashPage";
 import NewTaskPage from "./Pages/NewTaskPage";
 import EditTaskPage from "./Pages/EditTaskPage";
 import LoginPage from "./Pages/Auth/LoginPage";
@@ -34,6 +35,14 @@ function App() {
         <ProtectedRoute>
           <TaskProvider>
             <TasksPage />
+          </TaskProvider>
+        </ProtectedRoute>
+      } />
+      {/* TRASH PAGE — shows soft-deleted tasks the user can restore */}
+      <Route path="/tasks/trash" element={
+        <ProtectedRoute>
+          <TaskProvider>
+            <TrashPage />
           </TaskProvider>
         </ProtectedRoute>
       } />

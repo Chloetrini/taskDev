@@ -2,9 +2,8 @@ import { Response } from "express";
 import Task from "../models/TaskDuty";
 import { AuthRequest } from "../middlewares/authMiddleware";
 
-// ============================================================
-// GET ALL TASKS — only returns logged in user's tasks
-// ============================================================
+// GET ALL TASKS — only returns logged in user's ACTIVE tasks
+
 export const getTasks = async (
   req: AuthRequest,
   res: Response
@@ -13,6 +12,7 @@ export const getTasks = async (
     const tasks = await Task.find({
       userId: req.user?.id,
       isDraft: false,
+      isDeleted: { $ne: true }
     }).sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -25,9 +25,30 @@ export const getTasks = async (
   }
 };
 
-// ============================================================
+// GET TRASHED TASKS — only returns logged in user's trashed tasks
+
+export const getTrashedTasks = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const tasks = await Task.find({
+      userId: req.user?.id,
+      isDeleted: true, // only trashed tasks
+    }).sort({ deletedAt: -1 }); // most recently trashed first
+
+    res.status(200).json({
+      success: true,
+      count: tasks.length,
+      tasks,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 // GET SINGLE TASK — must belong to logged in user
-// ============================================================
+
 export const getTask = async (
   req: AuthRequest,
   res: Response
@@ -49,9 +70,9 @@ export const getTask = async (
   }
 };
 
-// ============================================================
+
 // CREATE TASK — attaches userId from logged in user
-// ============================================================
+
 export const createTask = async (
   req: AuthRequest,
   res: Response
@@ -80,9 +101,11 @@ export const createTask = async (
     }
 
     // duplicate title check scoped to this user only
+    // ignore trashed tasks so a trashed title can be reused
     const existingTask = await Task.findOne({
       taskTitle,
       userId: req.user?.id,
+      isDeleted: { $ne: true },
     });
     if (existingTask) {
       res.status(400).json({
@@ -112,9 +135,8 @@ export const createTask = async (
   }
 };
 
-// ============================================================
 // UPDATE TASK — only the owner can update their task
-// ============================================================
+
 export const updateTask = async (
   req: AuthRequest,
   res: Response
@@ -140,7 +162,7 @@ export const updateTask = async (
     const task = await Task.findOneAndUpdate(
       { _id: req.params.id, userId: req.user?.id },
       { taskTitle, taskDescription, tags, dueDate, isCompleted },
-      { new: true, runValidators: true }
+      { returnDocument: "after", runValidators: true }
     );
 
     if (!task) {
@@ -165,19 +187,21 @@ export const updateTask = async (
   }
 };
 
-// ============================================================
-// DELETE TASK — only the owner can delete their task
-// ============================================================
+// DELETE TASK — SOFT DELETE
+// Instead of removing the document, we flag it as deleted so the
+// user can restore it from the trash page later.
+
 export const deleteTask = async (
   req: AuthRequest,
   res: Response
 ): Promise<void> => {
   try {
-    // findOneAndDelete with userId ensures user can only delete their own task
-    const task = await Task.findOneAndDelete({
-      _id: req.params.id,
-      userId: req.user?.id,
-    });
+    // findOneAndUpdate scoped to userId so a user can only trash their own task
+    const task = await Task.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user?.id, isDeleted: { $ne: true } },
+      { isDeleted: true, deletedAt: new Date() }, // flag it + stamp the time
+      { returnDocument: "after"}
+    );
 
     if (!task) {
       res.status(404).json({ success: false, message: "Task not found" });
@@ -186,10 +210,39 @@ export const deleteTask = async (
 
     res.status(200).json({
       success: true,
-      message: "Task deleted successfully",
+      message: "Task moved to trash",
     });
   } catch (error) {
     console.error("Delete task error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// RESTORE TASK — brings a trashed task back to the active list
+export const restoreTask = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    // only restore a task that belongs to this user AND is currently trashed
+    const task = await Task.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user?.id, isDeleted: true },
+      { isDeleted: false, deletedAt: null },
+      { returnDocument: "after" }
+    );
+
+    if (!task) {
+      res.status(404).json({ success: false, message: "Task not found" });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Task restored successfully",
+      task,
+    });
+  } catch (error) {
+    console.error("Restore task error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

@@ -35,7 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserType | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // check if user is already logged in on app load
+  // check if user is already logged in on site load
   useEffect(() => {
     const checkAuth = async () => {
       try {
