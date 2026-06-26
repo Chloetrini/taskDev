@@ -246,3 +246,30 @@ export const restoreTask = async (
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+export const finalDeleteTask = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    // findByIdAndDelete scoped to userId so a user can only delete their own task
+    const task = await Task.findByIdAndDelete(
+      { _id: req.params.id, userId: req.user?.id ,
+     isDeleted: true }, // only allow final delete if it's already trashed
+      
+    );
+
+    if (!task) {
+      res.status(404).json({ success: false, message: "Task not found" });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Task deleted",
+    });
+  } catch (error) {
+    console.error("Delete task error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {getTasks,getTrashedTasks,getTask,createTask,updateTask,deleteTask, restoreTask } from "../controllers/taskController";
+import {getTasks,getTrashedTasks,getTask,createTask,updateTask,deleteTask, restoreTask, finalDeleteTask } from "../controllers/taskController";
 import { protect } from "../middlewares/authMiddleware";
 
 const router = Router();
@@ -13,6 +13,7 @@ router.get("/:id", protect, getTask);
 router.post("/", protect, createTask);
 router.put("/:id", protect, updateTask);
 router.delete("/:id", protect, deleteTask); // now a soft delete
+router.delete("/:id/delete", protect, finalDeleteTask); // now a soft delete
 router.put("/:id/restore", protect, restoreTask); // restore from trash
 
 export default router;
